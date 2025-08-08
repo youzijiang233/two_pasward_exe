@@ -9,9 +9,6 @@ import traceback
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
-# ---------------------------
-# 辅助函数：获取资源路径（兼容 PyInstaller 打包）
-# ---------------------------
 def resource_path(filename: str) -> str:
     """
     返回资源文件的绝对路径。
@@ -21,9 +18,7 @@ def resource_path(filename: str) -> str:
         return os.path.join(sys._MEIPASS, filename)
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
 
-# ---------------------------
 # 主界面类
-# ---------------------------
 class DualFileCompressor:
     def __init__(self, root):
         self.root = root
@@ -87,9 +82,9 @@ class DualFileCompressor:
         self.progress = ttk.Progressbar(self.root, length=400, mode="determinate")
         self.progress.grid(row=7, column=0, columnspan=3, padx=10, pady=10)
 
-    # ---------------------------
+
     # 辅助UI函数
-    # ---------------------------
+
     def browse_file(self, entry):
         choice = messagebox.askquestion("选择类型", "您要选择文件吗？点击“否”选择文件夹", icon="question", type="yesno")
         path = filedialog.askopenfilename() if choice == "yes" else filedialog.askdirectory()
@@ -108,16 +103,16 @@ class DualFileCompressor:
             self.output_entry.delete(0, tk.END)
             self.output_entry.insert(0, path)
 
-    # ---------------------------
+
     # 压缩入口：开启新线程以防止界面卡死
-    # ---------------------------
+
     def compress(self):
         t = threading.Thread(target=self._compress_worker, daemon=True)
         t.start()
 
-    # ---------------------------
+
     # 查找 7z：优先用系统的，否则使用程序目录下的（支持打包）
-    # ---------------------------
+
     def find_7z_cmd(self):
         exe_name = "7z.exe" if os.name == "nt" else "7z"
         from shutil import which
@@ -128,9 +123,9 @@ class DualFileCompressor:
             return path
         return None
 
-    # ---------------------------
+
     # 压缩与打包的工作线程
-    # ---------------------------
+
     def _compress_worker(self):
         try:
             file1 = self.file1_entry.get().strip()
@@ -222,9 +217,9 @@ class DualFileCompressor:
             except Exception:
                 pass
 
-    # ---------------------------
+
     # 调用 7z 压缩文件
-    # ---------------------------
+
     def run_7z_compress(self, seven_zip_cmd: str, source_path: str, out_archive: str, password: str):
         """
         调用 7z 压缩 source_path 到 out_archive，并设置密码。
@@ -233,9 +228,9 @@ class DualFileCompressor:
         cmd = [seven_zip_cmd, "a", "-t7z", out_archive, source_path, f"-p{password}", "-mhe=on"]
         subprocess.run(cmd, check=True)
 
-    # ---------------------------
+
     # 生成解压脚本（用于打包成最终EXE的入口）
-    # ---------------------------
+
     def _make_extractor_script(self, pw1: str, pw2: str) -> str:
         # The extractor script (a small GUI) will be packaged as the final exe entrypoint.
         # It reads embedded data1.7z and data2.7z and 7z.exe from sys._MEIPASS (PyInstaller), extracts to cwd.
@@ -321,9 +316,9 @@ if __name__ == "__main__":
 '''.replace("{", "{{").replace("}", "}}").replace("{{pwd}}", "{pwd}").replace("{{ex}}", "{ex}")
 
 
-    # ---------------------------
+
     # 更新状态和进度条
-    # ---------------------------
+
     def set_status(self, text: str, color: str = "blue"):
         self.root.after(0, lambda: (self.status_var.set(text), self.status_label.config(foreground=color)))
 
@@ -331,9 +326,9 @@ if __name__ == "__main__":
         self.root.after(0, lambda: self.progress.config(value=value))
 
 
-# ---------------------------
-# 程序入口
-# ---------------------------
+
+# 程序入口main
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = DualFileCompressor(root)
